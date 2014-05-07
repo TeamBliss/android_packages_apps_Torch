@@ -48,9 +48,11 @@ public class MainActivity extends Activity {
     private ToggleButton mButtonOn;
     private Switch mStrobeSwitch;
     private Switch mBrightSwitch;
+    private Switch mScreenOffSwitch;
 
     private boolean mBright;
     private boolean mTorchOn;
+    private boolean mScreenOff;
 
     // Strobe frequency slider.
     private SeekBar mSlider;
@@ -88,6 +90,7 @@ public class MainActivity extends Activity {
         mStrobeLabel = (TextView) findViewById(R.id.strobeTimeLabel);
         mSlider = (SeekBar) findViewById(R.id.slider);
         mBrightSwitch = (Switch) findViewById(R.id.bright_switch);
+        mScreenOffSwitch = (Switch) findViewById(R.id.screen_off_switch);
 
         mStrobePeriod = 100;
         mTorchOn = false;
@@ -118,7 +121,7 @@ public class MainActivity extends Activity {
         } else {
             // Fully hide the UI elements on Crespo since we can't use them
             mBrightSwitch.setVisibility(View.GONE);
-            findViewById(R.id.ruler2).setVisibility(View.GONE);
+            findViewById(R.id.ruler3).setVisibility(View.GONE);
         }
 
         // Set the state of the strobing section and hide as appropriate
@@ -134,6 +137,21 @@ public class MainActivity extends Activity {
                 int visibility = isChecked ? View.VISIBLE : View.GONE;
                 strobeLayout.setVisibility(visibility);
                 mPrefs.edit().putBoolean("strobe", isChecked).commit();
+            }
+        });
+
+        // Preference to adjust if screen turning off automatically turns off torch
+        mScreenOff = mPrefs.getBoolean("screenOff", false);
+        mScreenOffSwitch.setChecked(mScreenOff);
+        mScreenOffSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mScreenOff = true;
+                } else {
+                    mScreenOff = false;
+                }
+                mPrefs.edit().putBoolean("screenOff", mScreenOff).commit();
             }
         });
 
@@ -265,6 +283,7 @@ public class MainActivity extends Activity {
         mButtonOn.setChecked(mTorchOn);
         mBrightSwitch.setEnabled(!mTorchOn && mHasBrightSetting);
         mStrobeSwitch.setEnabled(!mTorchOn);
+        mScreenOffSwitch.setEnabled(!mTorchOn);
         mSlider.setEnabled(!mTorchOn || mStrobeSwitch.isChecked());
     }
 }
